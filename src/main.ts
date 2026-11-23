@@ -2,7 +2,6 @@
 import './style.css'
 
 const appName: string = import.meta.env.VITE_APP_NAME
-const appVersion: string = import.meta.env.VITE_APP_VERSION
 
 interface Task {
   id: number
@@ -10,6 +9,12 @@ interface Task {
   subject: string
   deadline: string
   completed: boolean
+}
+
+type TaskFilter = 'all' | 'pending' | 'completed'
+
+function getItems<T>(items: T[]): T[] {
+  return items
 }
 
 let tasks: Task[] = [
@@ -36,7 +41,7 @@ let tasks: Task[] = [
   }
 ]
 
-let currentFilter: 'all' | 'pending' | 'completed' = 'all'
+let currentFilter: TaskFilter = 'all'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -146,7 +151,7 @@ function renderTasks(): void {
   document.querySelector('#pending-count')!.textContent = String(pending)
   document.querySelector('#completed-count')!.textContent = String(completed)
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = getItems(tasks).filter(task => {
     if (currentFilter === 'pending') return !task.completed
     if (currentFilter === 'completed') return task.completed
     return true
@@ -259,8 +264,10 @@ form.addEventListener('submit', (event: SubmitEvent) => {
   closeModal()
 })
 
-document.querySelector('#task-list')!.addEventListener('click', (event: MouseEvent) => {
-  const target = event.target as HTMLElement
+document.querySelector('#task-list')!.addEventListener('click', (event: Event) => {
+  const target = event.target
+
+  if (!(target instanceof Element)) return
 
   const editButton = target.closest<HTMLButtonElement>('.edit-task')
   const deleteButton = target.closest<HTMLButtonElement>('.delete-task')
@@ -294,12 +301,11 @@ document.querySelector('#task-list')!.addEventListener('click', (event: MouseEve
   }
 })
 
-// FILTER MENU
 document.querySelectorAll<HTMLAnchorElement>('.menu-item[data-filter]').forEach(menu => {
   menu.addEventListener('click', (event: MouseEvent) => {
     event.preventDefault()
 
-    const filter = menu.dataset.filter as 'all' | 'pending' | 'completed'
+    const filter = menu.dataset.filter as TaskFilter
     currentFilter = filter
 
     document.querySelectorAll('.menu-item').forEach(item => {
