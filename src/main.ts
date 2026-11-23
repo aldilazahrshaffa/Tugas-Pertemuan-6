@@ -1,7 +1,7 @@
 
 import './style.css'
 
-const appName: string = import.meta.env.VITE_APP_NAME
+const appName: string = import.meta.env.VITE_APP_NAME + ' - Latihan'
 
 interface Task {
   id: number
